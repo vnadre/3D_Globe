@@ -1,18 +1,18 @@
 /** 3D Globe With Country Hover */
 
 // Wait for 3000 miliseconds before auto-rotating
-var rotationDelay = 3000
+var rotDelayTime = 3000
 // Globe scale
-var scaleFactor = 0.9
+var globeScaleFactor = 0.9
 // Autorotation speed of globe per second
-var degPerSec = 6
+var degreePerSecond = 6
 // Starting position of angle
 var angles = { x: -20, y: 40, z: 0}
 // Globe colors of different parts
-var colorWater = '#7CBAF5'
-var colorLand = '#0F540B'
-var colorGraticule = '#ccc'
-var colorCountry = '#000000'
+var WaterColor = '#7CBAF5'
+var landColor = '#0F540B'
+var graticuleColor = '#ccc'
+var countryColor = '#000000'
 
 // Country id and information map
 var countryMap = new Map(); 
@@ -242,7 +242,7 @@ function enter(country) {
   current.text(country && country.name || '')
 }
 
-function leave(country) {
+function leaveGlobe(country) {
   current.text('');
   countryInfo.text('');
   area.text('');
@@ -253,106 +253,106 @@ var current = d3.select('#current')
 var countryInfo = d3.select('#countryInfo')
 var area = d3.select('#area')
 var population = d3.select('#population')
-var canvas = d3.select('#globe')
-var context = canvas.node().getContext('2d')
-var water = {type: 'Sphere'}
-var projection = d3.geoOrthographic().precision(0.1)
-var graticule = d3.geoGraticule10()
-var path = d3.geoPath(projection).context(context)
-var v0 // Starting mouse position in Cartesian coordinates before dragging.
+var globeCanvas = d3.select('#globe')
+var context = globeCanvas.node().getContext('2d')
+var waterOnGlobe = {type: 'Sphere'}
+var globeProjection = d3.geoOrthographic().precision(0.1)
+var graticuleOnGlobe = d3.geoGraticule10()
+var globalPath = d3.geoPath(globeProjection).context(context)
+var p0 // Starting mouse position in Cartesian coordinates before dragging.
 var r0 // Start of projection rotation as Euler angles.
 var q0 // Starting projection rotation as versor.
-var lastTime = d3.now()
-var degPerMs = degPerSec / 1000
-var width, height
-var land, countries
+var endOfTime = d3.globeNow()
+var degreePerMillisecond = degreePerSecond / 1000
+var globeWidth, globeHeight
+var AllLand, countries
 var countryList
-var autorotate, now, diff, roation
+var automaticGlobeRotate, globeNow, globeDiff, globeRoation
 var currentCountry
 
 // Handling globe functionality 
 //setting angle of globe
 function setAngles() {
-  var rotation = projection.rotate()
-  rotation[0] = angles.y
-  rotation[1] = angles.x
-  rotation[2] = angles.z
-  projection.rotate(rotation)
+  var rotationOfGlobe = globeProjection.rotate()
+  rotationOfGlobe[0] = angles.y
+  rotationOfGlobe[1] = angles.x
+  rotationOfGlobe[2] = angles.z
+  globeProjection.rotate(rotationOfGlobe)
 }
 // Scalling globe
 function scale() {
-  width = document.documentElement.clientWidth
-  height = document.documentElement.clientHeight
-  canvas.attr('width', width).attr('height', height)
-  projection
-    .scale((scaleFactor * Math.min(width, height)) / 2)
-    .translate([width / 2, height / 2])
+  globeWidth = document.documentElement.clientWidth
+  globeHeight = document.documentElement.clientHeight
+  globeCanvas.attr('globeWidth', globeWidth).attr('globeHeight', globeHeight)
+  globeProjection
+    .scale((globeScaleFactor * Math.min(globeWidth, globeHeight)) / 2)
+    .translate([globeWidth / 2, globeHeight / 2])
   render()
 }
 // Start globe rotation
 function startRotation(delay) {
-  autorotate.restart(rotate, delay || 0)
+  automaticGlobeRotate.restart(rotate, delay || 0)
 }
 
 //Stop globe rotation
 function stopRotation() {
-  autorotate.stop()
+  automaticGlobeRotate.stop()
 }
 
 // Start dragging globe
 function dragstarted() {
-  v0 = versor.cartesian(projection.invert(d3.mouse(this)))
-  r0 = projection.rotate()
+  p0 = versor.cartesian(globeProjection.invert(d3.mouse(this)))
+  r0 = globeProjection.rotate()
   q0 = versor(r0)
   stopRotation()
 }
-
+//Dragging of globe
 function dragged() {
-  var v1 = versor.cartesian(projection.rotate(r0).invert(d3.mouse(this)))
-  var q1 = versor.multiply(q0, versor.delta(v0, v1))
-  var r1 = versor.rotation(q1)
-  projection.rotate(r1)
+  var v1 = versor.cartesian(globeProjection.rotate(r0).invert(d3.mouse(this)))
+  var q1 = versor.multiply(q0, versor.delta(p0, v1))
+  var r1 = versor.rotationOfGlobe(q1)
+  globeProjection.rotate(r1)
   render()
 }
 
 function dragended() {
-  startRotation(rotationDelay)
+  startRotation(rotDelayTime)
 }
-
+//Globe rendering
 function render() {
-  context.clearRect(0, 0, width, height)
-  fill(water, colorWater)
-  stroke(graticule, colorGraticule)
-  fill(land, colorLand)
+  context.clearRect(0, 0, globeWidth, globeHeight)
+  fill(waterOnGlobe, WaterColor)
+  stroke(graticuleOnGlobe, graticuleColor)
+  fill(AllLand, landColor)
   if (currentCountry) {
-    fill(currentCountry, colorCountry)
+    fill(currentCountry, countryColor)
   }
 }
-
+//filling color on globe
 function fill(obj, color) {
   context.beginPath()
-  path(obj)
+  globalPath(obj)
   context.fillStyle = color
   context.fill()
 }
-
+//Pointing out area on globe
 function stroke(obj, color) {
   context.beginPath()
-  path(obj)
+  globalPath(obj)
   context.strokeStyle = color
   context.stroke()
 }
-
+//Rotation of globe
 function rotate(elapsed) {
-  now = d3.now()
-  diff = now - lastTime
-  if (diff < elapsed) {
-    rotation = projection.rotate()
-    rotation[0] += diff * degPerMs
-    projection.rotate(rotation)
+  globeNow = d3.globeNow()
+  globeDiff = globeNow - endOfTime
+  if (globeDiff < elapsed) {
+    rotationOfGlobe = globeProjection.rotate()
+    rotationOfGlobe[0] += globeDiff * degreePerMillisecond
+    globeProjection.rotate(rotationOfGlobe)
     render()
   }
-  lastTime = now
+  endOfTime = globeNow
 }
 
 //Loading all data of counties in the world on globe
@@ -388,7 +388,7 @@ function mousemove() {
   var c = getCountry(this)
   if (!c) {
     if (currentCountry) {
-      leave(currentCountry)
+      leaveGlobe(currentCountry)
       currentCountry = undefined
       render()
     }
@@ -403,7 +403,7 @@ function mousemove() {
 }
 
 function getCountry(event) {
-  var pos = projection.invert(d3.mouse(event))
+  var pos = globeProjection.invert(d3.mouse(event))
   return countries.features.find(function(f) {
     return f.geometry.coordinates.find(function(c1) {
       return polygonContains(c1, pos) || c1.find(function(c2) {
@@ -414,7 +414,7 @@ function getCountry(event) {
 }
 
 setAngles()
-canvas
+globeCanvas
   .call(d3.drag()
     .on('start', dragstarted)
     .on('drag', dragged)
@@ -423,11 +423,11 @@ canvas
   .on('mousemove', mousemove)
 
 loadData(function(world, cList) {
-  land = topojson.feature(world, world.objects.land)
+  AllLand = topojson.feature(world, world.objects.AllLand)
   countries = topojson.feature(world, world.objects.countries)
   countryList = cList
   
   window.addEventListener('resize', scale)
   scale()
-  autorotate = d3.timer(rotate)
+  automaticGlobeRotate = d3.timer(rotate)
 })
