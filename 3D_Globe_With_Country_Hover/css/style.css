@@ -27,7 +27,6 @@ html, body {
   
 }
 
-
 #area {
   position: absolute;
   color: #30619F;
@@ -46,11 +45,4 @@ html, body {
   margin-left: 4%;
   margin-top: 16%;
   width: 200px;
-}
-#h2{
-	text-align: right;
-}
-
-#h7{
-	text-align: right;
 }

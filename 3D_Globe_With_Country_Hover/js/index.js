@@ -1,16 +1,14 @@
-//
-// Configuration
-//
+/** 3D Globe With Country Hover */
 
-// ms to wait after dragging before auto-rotating
+// Wait for 3000 miliseconds before auto-rotating
 var rotationDelay = 3000
-// scale of the globe (not the canvas element)
+// Globe scale
 var scaleFactor = 0.9
-// autorotation speed
+// Autorotation speed of globe per second
 var degPerSec = 6
-// start angles
+// Starting position of angle
 var angles = { x: -20, y: 40, z: 0}
-// colors
+// Globe colors of different parts
 var colorWater = '#7CBAF5'
 var colorLand = '#0F540B'
 var colorGraticule = '#ccc'
@@ -223,15 +221,9 @@ countryMap.set("887", "Yemen Stats - Total area : 		527,968 km2 - Population :  
 countryMap.set("818", "Egypt Stats - Total area : 		1,010,408 km2 - Population :  100,124,354");
 countryMap.set("818", "Egypt Stats - Total area : 		1,010,408 km2 - Population :  100,124,354");
 
-
-
-
 var infoArr = ["", "", ""];
 
-//
-// Handler
-//
-
+//Functionality for data representation of Globe
 function enter(country) {
   var country = countryList.find(function(c) {
     var text = countryMap.get(country.id);
@@ -257,12 +249,7 @@ function leave(country) {
   population.text('');
 }
 
-//
-// Variables
-//
-
 var current = d3.select('#current')
-// Selected country info
 var countryInfo = d3.select('#countryInfo')
 var area = d3.select('#area')
 var population = d3.select('#population')
@@ -272,9 +259,9 @@ var water = {type: 'Sphere'}
 var projection = d3.geoOrthographic().precision(0.1)
 var graticule = d3.geoGraticule10()
 var path = d3.geoPath(projection).context(context)
-var v0 // Mouse position in Cartesian coordinates at start of drag gesture.
-var r0 // Projection rotation as Euler angles at start.
-var q0 // Projection rotation as versor at start.
+var v0 // Starting mouse position in Cartesian coordinates before dragging.
+var r0 // Start of projection rotation as Euler angles.
+var q0 // Starting projection rotation as versor.
 var lastTime = d3.now()
 var degPerMs = degPerSec / 1000
 var width, height
@@ -283,10 +270,8 @@ var countryList
 var autorotate, now, diff, roation
 var currentCountry
 
-//
-// Functions
-//
-
+// Handling globe functionality 
+//setting angle of globe
 function setAngles() {
   var rotation = projection.rotate()
   rotation[0] = angles.y
@@ -294,7 +279,7 @@ function setAngles() {
   rotation[2] = angles.z
   projection.rotate(rotation)
 }
-
+// Scalling globe
 function scale() {
   width = document.documentElement.clientWidth
   height = document.documentElement.clientHeight
@@ -304,15 +289,17 @@ function scale() {
     .translate([width / 2, height / 2])
   render()
 }
-
+// Start globe rotation
 function startRotation(delay) {
   autorotate.restart(rotate, delay || 0)
 }
 
+//Stop globe rotation
 function stopRotation() {
   autorotate.stop()
 }
 
+// Start dragging globe
 function dragstarted() {
   v0 = versor.cartesian(projection.invert(d3.mouse(this)))
   r0 = projection.rotate()
@@ -368,9 +355,12 @@ function rotate(elapsed) {
   lastTime = now
 }
 
+//Loading all data of counties in the world on globe
 function loadData(cb) {
+  //Loded Json file with location co ordinates of country areas with respective country code
   d3.json('https://unpkg.com/world-atlas@1/world/110m.json', function(error, world) {
     if (error) throw error
+    //Loded .tsv file which contations all countries with respective to country their codes
     d3.tsv('https://gist.githubusercontent.com/mbostock/4090846/raw/07e73f3c2d21558489604a0bc434b3a5cf41a867/world-country-names.tsv', function(error, countries) {
       if (error) throw error
       cb(world, countries)
@@ -378,7 +368,7 @@ function loadData(cb) {
   })
 }
 
-// https://github.com/d3/d3-polygon
+// Hadling polygones
 function polygonContains(polygon, point) {
   var n = polygon.length
   var p = polygon[n - 1]
@@ -423,13 +413,7 @@ function getCountry(event) {
   })
 }
 
-
-//
-// Initialization
-//
-
 setAngles()
-
 canvas
   .call(d3.drag()
     .on('start', dragstarted)
