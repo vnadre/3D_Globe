@@ -17,7 +17,7 @@ var countryColor = '#000000'
 // Country id and information map
 var countryMap = new Map(); 
   
-// adding some elements to the map  
+// Adding map for country Id and country Statistics 
 countryMap.set("840", "United States Stats - Total area : 	3,796,742 km2 - Population :  325,719,178");
 countryMap.set("124", "Canada Stats - Total area : 9,984,670 km2 - Population : 35,151,728 "); 
 countryMap.set("036", "Australia Stats - Total area : 7,692,024 km2 - Population : 25,152,200 ");
@@ -223,7 +223,7 @@ countryMap.set("818", "Egypt Stats - Total area : 		1,010,408 km2 - Population :
 
 var infoArr = ["", "", ""];
 
-//Functionality for data representation of Globe
+// Functionality for data representation of Globe
 function enter(country) {
   var country = countryList.find(function(c) {
     var text = countryMap.get(country.id);
@@ -239,21 +239,22 @@ function enter(country) {
     }
     return c.id === country.id
   })
-  current.text(country && country.name || '')
+  currentCountryName.text(country && country.name || '')
 }
 
 function leaveGlobe(country) {
-  current.text('');
+  currentCountryName.text('');
   countryInfo.text('');
   area.text('');
   population.text('');
 }
 
-var current = d3.select('#current')
+var currentCountryName = d3.select('#currentCountryName')
 var countryInfo = d3.select('#countryInfo')
 var area = d3.select('#area')
 var population = d3.select('#population')
 var canvas = d3.select('#globe')
+
 var context = canvas.node().getContext('2d')
 var waterOnGlobe = {type: 'Sphere'}
 var globeProjection = d3.geoOrthographic().precision(0.1)
@@ -271,7 +272,7 @@ var autorotate, now, diff, roation
 var currentCountry
 
 // Handling globe functionality 
-//setting angle of globe
+// setting angle of globe
 function setAngles() {
   var rotation = globeProjection.rotate()
   rotation[0] = angles.y
@@ -294,7 +295,7 @@ function startRotation(delay) {
   autorotate.restart(rotate, delay || 0)
 }
 
-//Stop globe rotation
+// Stop globe rotation
 function stopRotation() {
   autorotate.stop()
 }
@@ -306,7 +307,7 @@ function dragstarted() {
   q0 = versor(r0)
   stopRotation()
 }
-//Dragging of globe
+// Dragging of globe
 function dragged() {
   var v1 = versor.cartesian(globeProjection.rotate(r0).invert(d3.mouse(this)))
   var q1 = versor.multiply(q0, versor.delta(p0, v1))
@@ -318,7 +319,7 @@ function dragged() {
 function dragended() {
   startRotation(rotDelayTime)
 }
-//Globe rendering
+// Globe rendering
 function render() {
   context.clearRect(0, 0, width, height)
   fill(waterOnGlobe, WaterColor)
@@ -328,7 +329,7 @@ function render() {
     fill(currentCountry, countryColor)
   }
 }
-//Globe filling with colors
+// Globe filling with colors
 function fill(obj, color) {
   context.beginPath()
   globalPath(obj)
@@ -342,7 +343,7 @@ function stroke(obj, color) {
   context.strokeStyle = color
   context.stroke()
 }
-//Rotation of globe
+// Rotation of globe
 function rotate(elapsed) {
   now = d3.now()
   diff = now - endOfTime
@@ -355,12 +356,12 @@ function rotate(elapsed) {
   endOfTime = now
 }
 
-//Loading all data of counties in the world on globe
+// Loading all data of counties in the world on globe
 function loadData(cb) {
-  //Loded Json file with location co ordinates of country areas with respective country code
+  // Loded Json file with location co ordinates of country areas with respective country code
   d3.json('https://unpkg.com/world-atlas@1/world/110m.json', function(error, world) {
     if (error) throw error
-    //Loded .tsv file which contations all countries with respective to country their codes
+    // Loded .tsv file which contations all countries with respective to country their codes
     d3.tsv('https://gist.githubusercontent.com/mbostock/4090846/raw/07e73f3c2d21558489604a0bc434b3a5cf41a867/world-country-names.tsv', function(error, countries) {
       if (error) throw error
       cb(world, countries)
@@ -383,7 +384,7 @@ function polygonContains(polygon, point) {
   }
   return inside
 }
-//Mouse movement on globe
+// Mouse movement on globe
 function mousemove() {
   var c = getCountry(this)
   if (!c) {
@@ -401,7 +402,7 @@ function mousemove() {
   render()
   enter(c)
 }
-//country reflection by mouse event on globe
+// Country reflection by mouse event on globe
 function getCountry(event) {
   var pos = globeProjection.invert(d3.mouse(event))
   return countries.features.find(function(f) {
@@ -422,7 +423,7 @@ canvas
    )
   .on('mousemove', mousemove)
   
-//Loading country data on globe
+// Loading country data on globe
 loadData(function(world, cList) {
   land = topojson.feature(world, world.objects.land)
   countries = topojson.feature(world, world.objects.countries)
