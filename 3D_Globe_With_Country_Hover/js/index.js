@@ -17,7 +17,7 @@ var countryColor = '#000000'
 var infoArr = ["", "", ""];
 
 // Functionality for data representation of Globe
-function enter(country) {
+function enterGlobe(country) {
   // Get country hovered by user
   var country = countryList.find(function(c) {
     var text = countryMap.get(country.id);
@@ -39,6 +39,7 @@ function enter(country) {
   currentCountryName.text(country && country.name || '')
 }
 
+// Function used for leaving globe
 function leaveGlobe(country) {
   currentCountryName.text('');
   countryInfo.text('');
@@ -163,10 +164,10 @@ function rotate(elapsed) {
 // Loading all data of counties in the world on globe
 function loadData(cb) {
   // Loded Json file with location co ordinates of country areas with respective country code
-  d3.json('https://unpkg.com/world-atlas@1/world/110m.json', function(error, world) {
+  d3.json('./../assets/country-coordinates.json', function(error, world) {
     if (error) throw error
-    // Loded .tsv file which contations all countries with respective to country their codes
-    d3.tsv('https://gist.githubusercontent.com/mbostock/4090846/raw/07e73f3c2d21558489604a0bc434b3a5cf41a867/world-country-names.tsv', function(error, countries) {
+    // Loded .tsv file which contations all countries with respective to their country codes
+    d3.tsv('./../assets/country-names.tsv', function(error, countries) {
       if (error) throw error
       cb(world, countries)
     })
@@ -205,7 +206,7 @@ function mousemove() {
   }
   currentCountry = c
   render()
-  enter(c)
+  enterGlobe(c)
 }
 
 // Country reflection by mouse event on globe
